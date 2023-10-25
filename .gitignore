@@ -1,0 +1,3 @@
+.env
+Data/*
+!Data/.gitkeep
