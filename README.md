@@ -1,2 +1,2 @@
-data links: 
-https://ton.twimg.com/birdwatch-public-data/2023/10/23/notes/notes-00000.tsv
+# Step 1
+- Download the 5 files from https://twitter.com/i/communitynotes/download-data and store them in the data folder

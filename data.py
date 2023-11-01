@@ -15,6 +15,8 @@ ratings_2_file_path = './Data/ratings-00000.tsv'
 note_status_history_file_path = './Data/noteStatusHistory-00000.tsv'
 user_enrollment_file_path = './Data/userEnrollment-00000.tsv'
 
+
+
 def import_and_combine_data_Rater_Model(necessary_columns):
 
     notes_df = pd.read_csv(notes_file_path, sep='\t', usecols=necessary_columns)
