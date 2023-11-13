@@ -3,6 +3,14 @@ ratings_1_file_path = './Data/ratings-00000.tsv'
 ratings_2_file_path = './Data/ratings-00000.tsv'
 note_status_history_file_path = './Data/noteStatusHistory-00000.tsv'
 
+def rater_model_performance(api):
+    
+    print("To be completed. does not need a specific training set, as this is for models with no finetuning.")
+
+def rater_model_performance(api, dataset):
+    print("To be completed. Need a specific dataset that does not include any training data.")
+
+
 def human_rater_performance():
     rating_1_df = pd.read_csv(ratings_1_file_path, sep='\t', usecols=['noteId', 'helpfulnessLevel'])
     rating_2_df = pd.read_csv(ratings_2_file_path, sep='\t', usecols=['noteId', 'helpfulnessLevel'])

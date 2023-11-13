@@ -16,9 +16,17 @@ user_enrollment_file_path = './Data/userEnrollment-00000.tsv'
 
 
 
-def import_and_combine_data_Rater_Model(necessary_columns):
+def import_and_combine_data_Rater_Model(necessary_columns = {"notes": ['noteId', 'tweetId', 'summary'], 
+    "noteStatusHistory": ['noteId', 'currentStatus'],}):
+    
+    notes_df = pd.read_csv(notes_file_path, sep='\t', usecols=necessary_columns['notes'])
+    note_status_df = pd.read_csv(note_status_history_file_path, sep='\t', usecols=necessary_columns.get('noteStatusHistory'))
+    result = pd.merge(notes_df, note_status_df, on='noteId').dropna()
 
-    notes_df = pd.read_csv(notes_file_path, sep='\t', usecols=necessary_columns)
+    print(result.head())
+    print(result.columns)
+    print(result.shape)
+    print(result.iloc[1])
 
 def download_datasets_into_data_folder():
     links = [
@@ -56,20 +64,12 @@ def download_datasets_into_data_folder():
             print(f"Failed to download {link}: {err}")
 
 
+def tweet_id_to_text(tweet_id):
+    return "To be completed"
 
-necessary_columns = {"notes": ['noteId', 'tweetId', 'summary'], 
-                     "noteStatusHistory": ['noteId', 'currentStatus'],
-                     }
+import_and_combine_data_Rater_Model()
 
 
-notes_df = pd.read_csv(notes_file_path, sep='\t', usecols=['noteId', 'tweetId', 'summary'])
-note_status_df = pd.read_csv(note_status_history_file_path, sep='\t', usecols=['noteId', 'currentStatus'])
 
-result = pd.merge(notes_df, note_status_df, on='noteId')
-
-print(result.head())
-print(result.columns)
-print(result.shape)
-print(result.iloc[1])
 
 # Use twitter API to get the tweet text from the tweetId column
