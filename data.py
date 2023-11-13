@@ -6,7 +6,9 @@
 import pandas as pd
 import os
 import requests
+import json
 
+bearer_token = os.environ.get("BEARER_TOKEN")
 
 notes_file_path = './Data/notes-00000.tsv'
 ratings_1_file_path = './Data/ratings-00000.tsv'
@@ -16,7 +18,7 @@ user_enrollment_file_path = './Data/userEnrollment-00000.tsv'
 
 
 
-def import_and_combine_data_Rater_Model(necessary_columns = {"notes": ['noteId', 'tweetId', 'summary'], 
+def import_and_combine_data_rater_model(necessary_columns = {"notes": ['noteId', 'tweetId', 'summary'], 
     "noteStatusHistory": ['noteId', 'currentStatus'],}):
     
     notes_df = pd.read_csv(notes_file_path, sep='\t', usecols=necessary_columns['notes'])
@@ -65,9 +67,32 @@ def download_datasets_into_data_folder():
 
 
 def tweet_id_to_text(tweet_id):
+    ids = "ids=1278747501642657792,1255542774432063488"
+    url = "https://api.twitter.com/2/tweets?{}".format(ids)
+    response = requests.request("GET", url, auth=bearer_oauth)
+    print(response.status_code)
+    if response.status_code != 200:
+        raise Exception(
+            "Request returned an error: {} {}".format(
+                response.status_code, response.text
+            )
+        )
+    json_response = response.json()
+    print(json.dumps(json_response, indent=4, sort_keys=True))
     return "To be completed"
 
-import_and_combine_data_Rater_Model()
+
+def bearer_oauth(r):
+    """
+    Method required by bearer token authentication.
+    """
+
+    r.headers["Authorization"] = f"Bearer {bearer_token}"
+    r.headers["User-Agent"] = "v2TweetLookupPython"
+    return r
+
+tweet_id_to_text(1278747501642657792)
+# import_and_combine_data_rater_model()
 
 
 
