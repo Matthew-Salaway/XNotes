@@ -1,4 +1,7 @@
 import pandas as pd
+from sklearn.metrics import accuracy_score
+
+
 ratings_1_file_path = './Data/ratings-00000.tsv'
 ratings_2_file_path = './Data/ratings-00000.tsv'
 note_status_history_file_path = './Data/noteStatusHistory-00000.tsv'
@@ -8,7 +11,21 @@ def rater_model_performance(api):
     print("To be completed. does not need a specific training set, as this is for models with no finetuning.")
 
 def rater_model_performance(api, dataset):
-    print("To be completed. Need a specific dataset that does not include any training data.")
+    true_labels = []
+    predicted_labels = []
+     
+    for instance in dataset:
+     tweet = instance['tweet']
+     note = instance['note']
+     true_label = instance['currentStatus'] 
+     prediction = api.predict(tweet, note)
+     true_labels.append(true_label)
+     predicted_labels.append(prediction)
+
+    
+    accuracy = accuracy_score(true_labels, predicted_labels)
+    print(f"Accuracy: {accuracy:.2f}")
+
 
 
 def human_rater_performance():
