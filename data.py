@@ -7,7 +7,10 @@ import pandas as pd
 import os
 import requests
 import json
+from dotenv import load_dotenv
+load_dotenv()
 
+# Do we need more? 
 bearer_token = os.environ.get("BEARER_TOKEN")
 
 notes_file_path = './Data/notes-00000.tsv'
@@ -16,21 +19,8 @@ ratings_2_file_path = './Data/ratings-00000.tsv'
 note_status_history_file_path = './Data/noteStatusHistory-00000.tsv'
 user_enrollment_file_path = './Data/userEnrollment-00000.tsv'
 
-
-
-def import_and_combine_data_rater_model(necessary_columns = {"notes": ['noteId', 'tweetId', 'summary'], 
-    "noteStatusHistory": ['noteId', 'currentStatus'],}):
-    
-    notes_df = pd.read_csv(notes_file_path, sep='\t', usecols=necessary_columns['notes'])
-    note_status_df = pd.read_csv(note_status_history_file_path, sep='\t', usecols=necessary_columns.get('noteStatusHistory'))
-    result = pd.merge(notes_df, note_status_df, on='noteId').dropna()
-
-    print(result.head())
-    print(result.columns)
-    print(result.shape)
-    print(result.iloc[1])
-
 def download_datasets_into_data_folder():
+    """Downloads the Community Notes datasets"""
     links = [
     'https://ton.twimg.com/birdwatch-public-data/2023/11/01/notes/notes-00000.tsv',
     'https://ton.twimg.com/birdwatch-public-data/2023/11/01/noteRatings/ratings-00001.tsv',
@@ -65,6 +55,19 @@ def download_datasets_into_data_folder():
         except requests.exceptions.HTTPError as err:
             print(f"Failed to download {link}: {err}")
 
+def merge_notes_and_note_status(
+        necessary_columns = {"notes": ['noteId', 'tweetId', 'summary'], 
+        "noteStatusHistory": ['noteId', 'currentStatus'],}
+    ):
+    
+    notes_df = pd.read_csv(notes_file_path, sep='\t', usecols=necessary_columns['notes'])
+    note_status_df = pd.read_csv(note_status_history_file_path, sep='\t', usecols=necessary_columns.get('noteStatusHistory'))
+    result = pd.merge(notes_df, note_status_df, on='noteId').dropna()
+
+    print(result.head())
+    print(result.columns)
+    print(result.shape)
+    print(result.iloc[1])
 
 def tweet_id_to_text(tweet_id):
     ids = "ids=1278747501642657792,1255542774432063488"
@@ -91,10 +94,8 @@ def bearer_oauth(r):
     r.headers["User-Agent"] = "v2TweetLookupPython"
     return r
 
-tweet_id_to_text(1278747501642657792)
-# import_and_combine_data_rater_model()
-
-
-
-
-# Use twitter API to get the tweet text from the tweetId column
+if __name__=="__main__":
+    # download_datasets_into_data_folder()
+    # merge_notes_and_note_status()
+    print(bearer_token)
+    tweet_id_to_text(1278747501642657792)
