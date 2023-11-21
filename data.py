@@ -11,7 +11,6 @@ import time
 from dotenv import load_dotenv
 load_dotenv()
 
-# Do we need more? 
 bearer_token = os.environ.get("BEARER_TOKEN")
 
 notes_file_path = './Data/notes-00000.tsv'
@@ -106,7 +105,8 @@ def tweet_id_to_text(tweet_id):
 
     json_response = response.json()
     print(json.dumps(json_response, indent=4, sort_keys=True))
-    text = json_response['data'][0]['text']
+    try: text = json_response['data'][0]['text']
+    except: text = None
     return text
 
 
@@ -119,10 +119,9 @@ def bearer_oauth(r):
     r.headers["User-Agent"] = "v2TweetLookupPython"
     return r
 
-
 def fetch_text_for_note_tweets(
-        input_path = "./Data/notes_and_note_status.csv",
-        n_tweets = 1000, 
+        input_path = "./Data/notes_and_note_status_filtered.csv",
+        n_tweets = 500, 
         output_path = "./Data/notes_and_note_status_with_note_text.csv"
     ):
 
@@ -134,9 +133,12 @@ def fetch_text_for_note_tweets(
 
     # Loop through the dataframe
     for idx, row in df.iterrows():
+        if idx % 15 == 0: start_time = time.time()
+
         # Fetch the tweet text
         tweet_id = row['tweetId']
         tweet_text = tweet_id_to_text(tweet_id)
+        if tweet_text == None: continue
 
         # Append a new row to output_df
         new_row = pd.DataFrame([row])
@@ -149,8 +151,11 @@ def fetch_text_for_note_tweets(
 
         # Sleep for rate limiting
         # Rate limit is 15 requests per 15 minutes
-        print(f"Sleeping for 60 seconds to avoid rate limiting.")
-        time.sleep(60)
+        if idx + 1 % 15 == 0:
+            time_elapsed = time.time() - start_time
+            time_to_sleep = 60*15 - time_elapsed
+            print(f"Sleeping for {time_to_sleep // 60} minutes to avoid rate limiting.")
+            time.sleep(time_to_sleep)
 
         # Break if we've reached the limit
         if idx + 1 == n_tweets: break
@@ -159,6 +164,5 @@ def fetch_text_for_note_tweets(
 if __name__=="__main__":
     # download_datasets_into_data_folder()
     # merge_notes_and_note_status()
-    filter_out_needs_more_ratings()
-    # tweet_id_to_text(1278747501642657792)
-    # fetch_text_for_note_tweets()
+    # filter_out_needs_more_ratings()
+    fetch_text_for_note_tweets()
