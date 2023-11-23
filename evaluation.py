@@ -13,7 +13,7 @@ def rater_model_performance(api):
 
 
 def chatgpt_predict(prompt):
-    openai.api_key = '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'
+    openai.api_key = 'api-key'
     
     response = openai.Completion.create(
         engine="text-davinci-002",  # Go over this 
