@@ -123,6 +123,7 @@ def evaluate_more(dataset):
 # print(eval)
 # Accuracy: 71.91%
 # {'Accuracy': 0.702054794520548, 'Precision': 0.632183908045977, 'Recall': 0.8270676691729323, 'Specificity': 0.5974842767295597, 'F1': 0.7166123778501629}
+# GPT-4 turbo analysis: {'Accuracy': 0.8321917808219178, 'Precision': 0.75, 'Recall': 0.9473684210526315, 'Specificity': 0.7358490566037735, 'F1': 0.8372093023255814}
 
 # Prompt 2
 # ratings_df_2 = generate_prediction_2(df)
@@ -142,3 +143,4 @@ def evaluate_more(dataset):
 # {'Accuracy': 0.7054794520547946, 'Precision': 0.6459627329192547, 'Recall': 0.7819548872180451, 'Specificity': 0.6415094339622641, 'F1': 0.707482993197279}
 # GPT-4 turbo analysis: {'Accuracy': 0.8287671232876712, 'Precision': 0.7515151515151515, 'Recall': 0.9323308270676691, 'Specificity': 0.7421383647798742, 'F1': 0.8322147651006712}
 # GPT-4 analysis: {'Accuracy': 0.7431506849315068, 'Precision': 0.6666666666666666, 'Recall': 0.8721804511278195, 'Specificity': 0.6352201257861635, 'F1': 0.7557003257328989}
+
