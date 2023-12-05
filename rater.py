@@ -20,7 +20,7 @@ def generate_prediction(dataset):
     for index, row in tqdm(dataset.iterrows()):
         tweet = row['tweet_text']
         note = row['summary']
-        prompt = f"I'm going to show you a Tweet and a Note about the tweet. Notes are supposed to clarify potential misinformation present in the Tweet. A helpful Note should be accurate and important. I'd like you to rate whether or not the Note is helpful. Here is the Tweet: {tweet}. Here is the Note: {note}. Do you think the Note is helpful? You must respond with only a single word: either \"Yes\" or \"No\" "
+        prompt = f"I'm going to show you a Tweet and a Note about the tweet. Notes are supposed to clarify potential misinformation present in the Tweet. A helpful Note should be accurate and important. I'd like you to rate whether or not the Note is helpful. Here is the Tweet: '''{tweet}'''. Here is the Note: '''{note}'''. Do you think the Note is helpful? You must respond with only a single word: either \"Yes\" or \"No\" "
 
         response = client.chat.completions.create(
         model="gpt-3.5-turbo",
@@ -111,16 +111,17 @@ def evaluate_more(dataset):
 
     return {'Accuracy': accuracy, 'Precision': precision, 'Recall': recall, 'Specificity': specificity, 'F1': f1}
 
+# GPT Tubro Model Name: gpt-4-1106-preview
 
 # Prompt 1
-# ratings_df = generate_prediction(df)
-# to_csv(ratings_df)
-# accuracy = evaluate(ratings_df)
-# print('-'*50 + 'Accuracy' + '-'*50)
-# print(accuracy)
-# eval = evaluate_more(ratings_df)
-# print('-'*50 + 'Evaluatiion' + '-'*50)
-# print(eval)
+ratings_df = generate_prediction(df)
+to_csv(ratings_df)
+accuracy = evaluate(ratings_df)
+print('-'*50 + 'Accuracy' + '-'*50)
+print(accuracy)
+eval = evaluate_more(ratings_df)
+print('-'*50 + 'Evaluatiion' + '-'*50)
+print(eval)
 # Accuracy: 71.91%
 # {'Accuracy': 0.702054794520548, 'Precision': 0.632183908045977, 'Recall': 0.8270676691729323, 'Specificity': 0.5974842767295597, 'F1': 0.7166123778501629}
 # GPT-4 turbo analysis: {'Accuracy': 0.8321917808219178, 'Precision': 0.75, 'Recall': 0.9473684210526315, 'Specificity': 0.7358490566037735, 'F1': 0.8372093023255814}
