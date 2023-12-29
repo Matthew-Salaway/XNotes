@@ -10,6 +10,7 @@ import json
 import time
 from dotenv import load_dotenv
 load_dotenv()
+import pdb
 
 bearer_token = os.environ.get("BEARER_TOKEN")
 
@@ -122,28 +123,34 @@ def bearer_oauth(r):
 def fetch_text_for_note_tweets(
         input_path = "./Data/notes_and_note_status_filtered.csv",
         n_tweets = 500, 
-        output_path = "./Data/notes_and_note_status_with_note_text.csv"
+        output_path = "./Data/master.csv"
     ):
 
     """Loops through a CSV of Tweets, fetches the text for each tweet, and saves the file."""
 
     # Read the CSV
-    df = pd.read_csv(input_path)
-    output_df = pd.DataFrame(columns=['noteId', 'tweetId', 'summary', 'currentStatus', 'tweet_text'])
+    input_df = pd.read_csv(input_path)
+    output_df = pd.read_csv(output_path)
+    # summary has been renamed original_note
 
     # Loop through the dataframe
-    for idx, row in df.iterrows():
+    for idx, row in input_df.iterrows():
+        # Track time for rate limiting
         if idx % 15 == 0: start_time = time.time()
 
-        # Fetch the tweet text
+        # Check if we already have the text for this tweet
         tweet_id = row['tweetId']
+        if tweet_id in output_df['tweetId'].values: continue
+
+        # If not, fetch the tweet text
         tweet_text = tweet_id_to_text(tweet_id)
-        if tweet_text == None: continue
 
         # Append a new row to output_df
         new_row = pd.DataFrame([row])
         new_row['tweet_text'] = tweet_text
         output_df = pd.concat([output_df, new_row], ignore_index=True)
+
+        print(f"New Row: {new_row}")
 
         # Save the dataframe
         output_df.to_csv(output_path, index=False)
