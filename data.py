@@ -21,7 +21,12 @@ note_status_history_file_path = './Data/noteStatusHistory-00000.tsv'
 user_enrollment_file_path = './Data/userEnrollment-00000.tsv'
 
 def download_datasets_into_data_folder():
-    """Downloads the Community Notes datasets"""
+    """
+    This function downloads various TSV format datasets from the Community Notes project, 
+    which include notes, ratings, note status history, and user enrollment data, and saves 
+    them in a newly created 'Data' directory if it doesn't already exist.
+    """
+    
     links = [
     'https://ton.twimg.com/birdwatch-public-data/2023/11/01/notes/notes-00000.tsv',
     'https://ton.twimg.com/birdwatch-public-data/2023/11/01/noteRatings/ratings-00001.tsv',
@@ -60,6 +65,11 @@ def merge_notes_and_note_status(
         necessary_columns = {"notes": ['noteId', 'tweetId', 'summary'], 
         "noteStatusHistory": ['noteId', 'currentStatus'],}
     ):
+
+    """
+    This function merges 'notes' and 'note status history' data from CSV files into
+    a single file, selecting specific columns and saving the result to a new CSV file.
+    """
     
     notes_df = pd.read_csv(notes_file_path, sep='\t', usecols=necessary_columns['notes'])
     note_status_df = pd.read_csv(note_status_history_file_path, sep='\t', usecols=necessary_columns.get('noteStatusHistory'))
@@ -70,6 +80,9 @@ def filter_out_needs_more_ratings(
         input_path = "./Data/notes_and_note_status.csv", 
         output_path = "./Data/notes_and_note_status_filtered.csv"
     ):
+    """
+    This function filters out notes that have not yet been rated by enough users.
+    """
     # Alternate between helpful statuses
     good_statuses = ["CURRENTLY_RATED_HELPFUL", "CURRENTLY_RATED_NOT_HELPFUL"]
     current_status = 0
@@ -86,6 +99,10 @@ def filter_out_needs_more_ratings(
     
 
 def tweet_id_to_text(tweet_id):
+    """
+    This function retrieves the text of a tweet using its ID from the Twitter API, 
+    handling rate limiting and returning the tweet text.
+    """
     print(f"Tweet ID: {tweet_id}")
     url = "https://api.twitter.com/2/tweets?ids={}".format(tweet_id)
     response = requests.request("GET", url, auth=bearer_oauth)
@@ -113,7 +130,8 @@ def tweet_id_to_text(tweet_id):
 
 def bearer_oauth(r):
     """
-    Method required by bearer token authentication.
+    This method is used for bearer token authentication with the Twitter API, 
+    setting the necessary headers for the request.
     """
 
     r.headers["Authorization"] = f"Bearer {bearer_token}"

@@ -11,7 +11,7 @@ def rater_model_performance(api):
     
     print("To be completed. does not need a specific training set, as this is for models with no finetuning.")
 
-
+    
 def chatgpt_predict(prompt):
     openai.api_key = 'api-key'
     

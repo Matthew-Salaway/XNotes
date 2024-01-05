@@ -23,7 +23,7 @@ def generate_prediction(dataset):
         prompt = f"I'm going to show you a Tweet and a Note about the tweet. Notes are supposed to clarify potential misinformation present in the Tweet. A helpful Note should be accurate and important. I'd like you to rate whether or not the Note is helpful. Here is the Tweet: '''{tweet}'''. Here is the Note: '''{note}'''. Do you think the Note is helpful? You must respond with only a single word: either \"Yes\" or \"No\" "
 
         response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4-1106-preview",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=2
         )
@@ -71,8 +71,23 @@ def generate_prediction_3(dataset):
             dataset.at[index,'isNoteHelpful?'] = 0
     return dataset
 
-def to_csv(dataset):
-    dataset.to_csv('note_ratings.csv',index=False)
+def generate_prediction_4(dataset):
+    for index, row in tqdm(dataset.iterrows()):
+        tweet = row['tweet_text']
+        note = row['summary']
+        prompt = f"I'm going to show you a Tweet and a Note about the tweet. Notes are supposed to clarify potential misinformation present in the Tweet. A helpful Note should be accurate, important, and link a reputable source. I'd like you to rate whether or not the Note is helpful. Here is the Tweet: {tweet}. Here is the Note: {note}. Do you think the Note is helpful? You must respond with only a single word: either \"Yes\" or \"No\" "
+
+        response = client.chat.completions.create(
+        model="gpt-4-1106-preview",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=2
+        )
+
+        if response.choices[0].message.content == 'Yes':
+            dataset.at[index,'isNoteHelpful?'] = 1
+        else:
+            dataset.at[index,'isNoteHelpful?'] = 0
+    return dataset
 
 def evaluate(dataset):
     correct = 0
@@ -114,17 +129,18 @@ def evaluate_more(dataset):
 # GPT Tubro Model Name: gpt-4-1106-preview
 
 # Prompt 1
-ratings_df = generate_prediction(df)
-to_csv(ratings_df)
-accuracy = evaluate(ratings_df)
-print('-'*50 + 'Accuracy' + '-'*50)
-print(accuracy)
-eval = evaluate_more(ratings_df)
-print('-'*50 + 'Evaluatiion' + '-'*50)
-print(eval)
+# ratings_df = generate_prediction(df)
+# to_csv(ratings_df)
+# accuracy = evaluate(ratings_df)
+# print('-'*50 + 'Accuracy' + '-'*50)
+# print(accuracy)
+# eval = evaluate_more(ratings_df)
+# print('-'*50 + 'Evaluatiion' + '-'*50)
+# print(eval)
 # Accuracy: 71.91%
 # {'Accuracy': 0.702054794520548, 'Precision': 0.632183908045977, 'Recall': 0.8270676691729323, 'Specificity': 0.5974842767295597, 'F1': 0.7166123778501629}
 # GPT-4 turbo analysis: {'Accuracy': 0.8321917808219178, 'Precision': 0.75, 'Recall': 0.9473684210526315, 'Specificity': 0.7358490566037735, 'F1': 0.8372093023255814}
+# with quotes around the note. gpt4 turbo {'Accuracy': 0.839041095890411, 'Precision': 0.7559523809523809, 'Recall': 0.9548872180451128, 'Specificity': 0.7421383647798742, 'F1': 0.8438538205980066}
 
 # Prompt 2
 # ratings_df_2 = generate_prediction_2(df)
@@ -145,3 +161,12 @@ print(eval)
 # GPT-4 turbo analysis: {'Accuracy': 0.8287671232876712, 'Precision': 0.7515151515151515, 'Recall': 0.9323308270676691, 'Specificity': 0.7421383647798742, 'F1': 0.8322147651006712}
 # GPT-4 analysis: {'Accuracy': 0.7431506849315068, 'Precision': 0.6666666666666666, 'Recall': 0.8721804511278195, 'Specificity': 0.6352201257861635, 'F1': 0.7557003257328989}
 
+
+# Prompt 4
+ratings_df_4 = generate_prediction_4(df)
+to_csv(ratings_df_4)
+eval = evaluate_more(ratings_df_4)
+print('-'*50 + 'Evaluation' + '-'*50)
+print(eval)
+# 3.5 turbo: {'Accuracy': 0.702054794520548, 'Precision': 0.6455696202531646, 'Recall': 0.7669172932330827, 'Specificity': 0.6477987421383647, 'F1': 0.7010309278350515}
+# 4 turbo: {'Accuracy': 0.8527397260273972, 'Precision': 0.78125, 'Recall': 0.9398496240601504, 'Specificity': 0.779874213836478, 'F1': 0.8532423208191127}
