@@ -1,4 +1,0 @@
-Human Rating Performance
-    - {'Accuracy': 0.862168481373039, 'Precision': 0.9591068901484003, 'Recall': 0.862222199445632, 'Specificity': 0.8619667833219083, 'F1': 0.90808767844535}
-    - * Only using helpful or not hulpful current status and reviews
-    
