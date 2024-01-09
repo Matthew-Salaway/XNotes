@@ -1,7 +1,3 @@
-###########
-# Writer # 
-###########
-
 import pandas as pd
 import numpy as np
 import openai
@@ -15,12 +11,20 @@ from collections import defaultdict
 from dotenv import load_dotenv
 load_dotenv()
 
+###################
+###   Writer    ###
+###################
 
 
 
-#########
-# Rater # 
-#########
+
+
+
+
+###################
+###    Rater    ###
+###################
+
 
 def create_fine_tuning_file(tweets, notes, current_statuses, file_name):
     """
