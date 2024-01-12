@@ -1,5 +1,18 @@
 import pandas as pd
 
+def call_gpt(prompt, endpoint, max_tokens=200):
+    return openai.chat.completions.create(
+        model=endpoint,
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=max_tokens
+    ).choices[0].message.content
+
+def truncate_text(text, max_tokens):
+    tokens = text.split()
+    if len(tokens) <= max_tokens:
+        return text  
+    return ' '.join(tokens[:max_tokens])
+
 def human_rater_performance():
 
     """

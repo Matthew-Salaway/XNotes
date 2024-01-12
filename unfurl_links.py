@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from nltk.metrics import edit_distance
 from dotenv import load_dotenv
 from data import tweet_id_to_text
+from utils import truncate_text
 load_dotenv()
 
 def extract_links_from_text(text):
@@ -43,13 +44,6 @@ def count_words(input_string):
   words = input_string.split()
   return len(words)
 
-def select_first_1000_words(text):
-  text_pieces = text.split()
-  shortened_text_pieces = text_pieces[:1000]
-  shortened_text = ' '.join(shortened_text_pieces)
-  return shortened_text
-
-
 
 def unfurl_links(text):
   """
@@ -78,7 +72,7 @@ def unfurl_links(text):
       link_text = extract_text_from_simple_link(redirected_url, timeout=10)
       # And shortened to their first 1000 words
       link_text = clean_text(link_text)
-      link_text = select_first_1000_words(link_text)
+      link_text = truncate_text(link_text, 1000)
       content = link_text
     
     # Replace each link with its content
