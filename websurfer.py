@@ -6,6 +6,7 @@ import os
 from dotenv import load_dotenv
 from utils import call_gpt, truncate_text
 import pdb
+import time
 
 load_dotenv()
 openai.api_key = os.environ.get('OPENAI_API_KEY')
@@ -49,48 +50,49 @@ def gather_sources(prompt, output_type, endpoint, tweet, note=None, num_sources=
     ).choices[0].message.content
 
     # Search the query
-    search_results = search(search_query, num_results=10)
+    search_results = []
+    while not search_results:
+        try: search_results = list(search(search_query, num_results=10))
+        except:
+            print("Error on Google Search! Sleeping for 30 seconds.")
+            time.sleep(30)
 
     # Loop through search results to summarize relevant sources
     urls, summaries = [], []
-    try:
-        for url in search_results:
-            try:
-                # Fetch the text from the URL
-                response = requests.get(url, timeout=5)
-                soup = BeautifulSoup(response.text, 'html.parser')
-                text = soup.get_text()
-                truncated_text = truncate_text(text, max_tokens=3000)
-                text_preview = truncate_text(text, max_tokens=500)
+    for url in search_results:
+        try:
+            # Fetch the text from the URL
+            response = requests.get(url, timeout=5)
+            soup = BeautifulSoup(response.text, 'html.parser')
+            text = soup.get_text()
+            truncated_text = truncate_text(text, max_tokens=3000)
+            text_preview = truncate_text(text, max_tokens=500)
 
-                # Interact with ChatGPT to check if the source is useful and necessary
-                relevance_response = openai.chat.completions.create(
+            # Interact with ChatGPT to check if the source is useful and necessary
+            relevance_response = openai.chat.completions.create(
+                model=endpoint,
+                messages=[{"role": "user", "content": prompt + format_sources(summaries, urls) + 
+                    prompts['relevant_source_prompt'].format(url=url, text_preview=text_preview, output_type=output_type)
+                }]
+            ).choices[0].message.content
+
+            if "yes" in relevance_response.lower():
+                # Ask ChatGPT to write a brief summary
+                summary = openai.chat.completions.create(
                     model=endpoint,
                     messages=[{"role": "user", "content": prompt + format_sources(summaries, urls) + 
-                        prompts['relevant_source_prompt'].format(url=url, text_preview=text_preview, output_type=output_type)
+                        prompts['summarize_source_prompt'].format(url=url, text=truncated_text, output_type=output_type)
                     }]
                 ).choices[0].message.content
 
-                if "yes" in relevance_response.lower():
-                    # Ask ChatGPT to write a brief summary
-                    summary = openai.chat.completions.create(
-                        model=endpoint,
-                        messages=[{"role": "user", "content": prompt + format_sources(summaries, urls) + 
-                            prompts['summarize_source_prompt'].format(url=url, text=truncated_text, output_type=output_type)
-                        }]
-                    ).choices[0].message.content
-
-                    urls.append(url)
-                    summaries.append(summary)
-
-            except Exception as e:
                 urls.append(url)
-                summaries.append("The URL could not be fetched.")
+                summaries.append(summary)
 
-            if len(summaries)==num_sources:
-                break
-    except Exception as e:
-        print(e)
-        pdb.set_trace()
+        except Exception as e:
+            urls.append(url)
+            summaries.append("The URL could not be fetched.")
+
+        if len(summaries)==num_sources:
+            break
 
     return format_sources(summaries, urls)
