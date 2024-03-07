@@ -8,18 +8,19 @@ import pdb
 import time
 
 prompts = {
-    'note': "I'm going to show you a Tweet, and I'd like you to write a helpful Community Note about it. A Community Note should correct false information or provide helpful context for a potentially misleading Tweet. Notes should be clear, concise, and based on verifiable information. The Community Notes system asks people of different political persuasions to vote on Notes, and a Note is only deemed helpful if people from across the political spectrum vote for it. Your job is to write a helpful Community Note.\nHere is the Tweet: '{tweet}'",
+    'note': "I'm going to show you a Tweet, and I'd like you to write a helpful Community Note about it. A Community Note should correct false information or provide helpful context for a misleading Tweet. Notes should be clear, concise, and based on verifiable information. The Community Notes system asks people of different political persuasions to vote on Notes, and a Note is only deemed helpful if people from across the political spectrum vote for it. Your job is to write a helpful Community Note.\n\nHere is the Tweet: '{tweet}'",
 
-    'rating': "I'm going to show you a Tweet and a Community Note, and I'd like you to predict whether the Rating of the Community Note is helpful or not helpful. A Community Note should correct false information or provide helpful context for a potentially misleading Tweet. Notes should be clear, concise, and based on verifiable information. The Community Notes system asks people of different political persuasions to vote on Notes, and a Note is only deemed helpful if people from across the political spectrum vote for it. Your job is to predict whether the Community Notes system will deem the following Note helpful.\nHere is the Tweet: '{tweet}'\nHere is the Note: '{note}'",
+    'rating': "I'm going to show you a Tweet and a Community Note, and I'd like you to predict whether the Rating of the Community Note is helpful or not helpful. A Community Note should correct false information or provide helpful context for a potentially misleading Tweet. Notes should be clear, concise, and based on verifiable information. The Community Notes system asks people of different political persuasions to vote on Notes, and a Note is only deemed helpful if people from across the political spectrum vote for it. Notes are only helpful if the Tweet is false or seriously misleading. Your job is to predict whether the Community Notes system will deem the following Note helpful.\nHere is the Tweet: '{tweet}'\nHere is the Note: '{note}'",
 
-    'initial_reflection': "\n\nFirst, I'd like you to briefly reflect on any questions, concerns, or thoughts you might have. Please write only a few sentences or less. Only output your questions and concerns--nothing extraneous.",
+    'initial_reflection': "\n\nLet's think through this step by step. What are your initial thoughts? Keep it to a few sentence or less.",
 
     'rubric_prompt': "\n\nBefore you predict the probability of the Note being rated helpful, we'll ask you a few questions about the note.",
 
     'rubric_list': [
-        "\n\nFirst, a good note must be concise. The first sentence should immediately clarify misleading information from the original Tweet, or provide valuable context for the reader. There should be no unnecessary preamble. If you were scoring this note on a scale from 0 to 10, what score would you give its concision, and why? Explain your reasoning before providing a numerical score.",
+        "\n\nFirst, a good note must be necessary. Notes are only necessary when the orignal Tweet is false or seriously misleading. Tweets that are clearly humorous or sarcastic do not require Notes. Notes which merely add helpful information to a Tweet that is not seriously misleading are unhelpful. If you were scoring this note on a scale from 0 to 10, what score would you give its necessity, and why? Explain your reasoning before providing a numerical score.",
         "\n\nSecond, a good note must be factual, accurate, and verifiable. It should make clear claims that contradict or provide context on the post. Those claims should be correct, and they should be backed up by links to sources which verify those claims. If you were scoring this note on a scale from 0 to 10, what score would you give its factuality, and why? Explain your reasoning before providing a numerical score.",
-        "\n\nThird, a good note must be politically neutral. Most notes are not political at all, which is exactly how they should be. But if a note is likely to be favored by one or the other side of the political spectrum, it is unlikely to be rated helpful by people with a wide range of political views. If you were scoring this note on a scale from 0 to 10, what score would you give its political neutrality, and why? Explain your reasoning before providing a numerical score."
+        "\n\nThird, a good note must be politically neutral. Most notes are not political at all, which is exactly how they should be. But if a note is likely to be favored by one or the other side of the political spectrum, it is unlikely to be rated helpful by people with a wide range of political views. If you were scoring this note on a scale from 0 to 10, what score would you give its political neutrality, and why? Explain your reasoning before providing a numerical score.",
+        "\n\nFinally, a good note must be concise. The first sentence should immediately clarify misleading information from the original Tweet, or provide valuable context for the reader. There should be no unnecessary preamble. If you were scoring this note on a scale from 0 to 10, what score would you give its concision, and why? Explain your reasoning before providing a numerical score.",
     ],
 
     'final_reflection_note_prompt': "\n\nOverall, do you think the Tweet is false or misleading? What's false or misleading about it? What additional context might you be able to add? Remember, not every Tweet is false or misleading. For reference, here's the Tweet again:\n{tweet}",
@@ -37,7 +38,7 @@ def process_df(input_path, output_type, endpoint, links, cot, sources, rubric=Fa
     and a set of options about which rater model to use,
     return a DataFrame with estimated probabilities that the notes are helpful. 
     """
-    df = pd.read_csv(input_path, doutput_type={'noteId': str, 'tweetId': str})
+    df = pd.read_csv(input_path, dtype={'noteId': str, 'tweetId': str})
     assert 'tweet_text' in df.columns
     assert output_type in ["rating", "note"], "output_type must be rating or note"
     if output_type == "rating": 
@@ -55,14 +56,12 @@ def process_df(input_path, output_type, endpoint, links, cot, sources, rubric=Fa
     if sources is True: tagline += f"_sources"
     if rubric is True: tagline += f"_rubric"
 
-    # Example tagline: "rating_gpt-3.5_links_cot_rubric" -- uses everything but sources
-
     # Initialize columns to store outputs
-    if output_type=="note" and f"{tagline}_note" not in df.columns:
+    if output_type=="note" and f"{tagline}_prompt" not in df.columns:
         df[f"{tagline}_note"] = ''
         df[f"{tagline}_note_probability"] = np.NaN
         df[f"{tagline}_prompt"] = ''
-    elif output_type=="rating" and f"{tagline}_rating" not in df.columns:
+    elif output_type=="rating" and f"{tagline}_prompt" not in df.columns:
         df[f"{tagline}_probability"] = np.NaN
         df[f"{tagline}_prompt"] = ''
     if links==True and 'media_content' not in df.columns: df['media_content'] = ''
@@ -70,7 +69,7 @@ def process_df(input_path, output_type, endpoint, links, cot, sources, rubric=Fa
     for idx, row in df.iterrows():
         print(f"Processing row {idx} of {len(df)}")
         # Skip if already completed
-        if row[f"{tagline}_prompt"] != '': 
+        if row[f"{tagline}_prompt"] not in (None, '', np.nan):
             print(row[f"{tagline}_prompt"])
             continue
 
@@ -78,8 +77,6 @@ def process_df(input_path, output_type, endpoint, links, cot, sources, rubric=Fa
         if output_type=="rating": 
             note = row[note_column]
         else: note = None
-
-        prompt = prompts['rating'].format(tweet=tweet, note=note)
 
         # Start timing. I want to see how long each piece takes. 
         start = time.time()
@@ -92,6 +89,10 @@ def process_df(input_path, output_type, endpoint, links, cot, sources, rubric=Fa
             print("Links finished in {:.2f} seconds.\n".format(time.time()-start))
             start = time.time()
         
+        # Initialize the prompt
+        if output_type=="note": prompt = prompts['note'].format(tweet=tweet)
+        else: prompt = prompts['rating'].format(tweet=tweet, note=note)
+
         if cot: 
             # Intiial reflection on concerns
             prompt += prompts['initial_reflection']
@@ -177,8 +178,8 @@ if __name__=="__main__":
         output_type='rating',
         endpoint='gpt-3.5-turbo-1106',
         links=True, 
-        cot=True, 
-        sources=True, 
+        cot=False, 
+        sources=False, 
         rubric=True, 
         note_column='original_note',
     )

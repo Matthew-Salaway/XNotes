@@ -1,4 +1,10 @@
 import pandas as pd
+import openai
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+openai.api_key = os.environ.get('OPENAI_API_KEY')
 
 def call_gpt(prompt, endpoint, max_tokens=200):
     return openai.chat.completions.create(
@@ -12,6 +18,8 @@ def truncate_text(text, max_tokens):
     if len(tokens) <= max_tokens:
         return text  
     return ' '.join(tokens[:max_tokens])
+
+
 
 def human_rater_performance():
 
@@ -67,9 +75,3 @@ def human_rater_performance():
     f1 = 2 * precision * recall / (precision + recall)
 
     return {'Accuracy': accuracy, 'Precision': precision, 'Recall': recall, 'Specificity': specificity, 'F1': f1}
-
-
-
-    
-
-print(human_rater_performance())

@@ -11,21 +11,6 @@ from collections import defaultdict
 from dotenv import load_dotenv
 load_dotenv()
 
-###################
-###   Writer    ###
-###################
-
-
-
-
-
-
-
-###################
-###    Rater    ###
-###################
-
-
 def create_fine_tuning_file(tweets, notes, current_statuses, file_name):
     """
     Creates a .jsonl file for fine-tuning a language model. Takes three lists as input: 

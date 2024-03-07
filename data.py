@@ -147,9 +147,8 @@ def fetch_text_for_note_tweets(
     """Loops through a CSV of Tweets, fetches the text for each tweet, and saves the file."""
 
     # Read the CSV
-    input_df = pd.read_csv(input_path)
-    output_df = pd.read_csv(output_path)
-    # summary has been renamed original_note
+    input_df = pd.read_csv(input_path, dtype={'noteId': str, 'tweetId': str})
+    output_df = pd.read_csv(output_path, dtype={'noteId': str, 'tweetId': str})
 
     # Loop through the dataframe
     for idx, row in input_df.iterrows():

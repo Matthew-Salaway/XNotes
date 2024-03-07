@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from nltk.metrics import edit_distance
 from dotenv import load_dotenv
 from data import tweet_id_to_text
-from utils import truncate_text
+from utils import truncate_text, call_gpt
 load_dotenv()
 
 def extract_links_from_text(text):
@@ -51,14 +51,17 @@ def unfurl_links(text):
   and incorporate the content into the body of the original text. 
   """
   # Use regex to extract all links from the text
+  print("1")
   links = extract_links_from_text(text)
   media_flag = False
-
+AwesoTha
   for url in links:
+    print(f"2: {url}")
     # Sometimes a link redirects to another link, so we need to follow the redirect
-    redirected_url = requests.get(url).url
+    redirected_url = requests.get(url, timeout=5).url
     # Links to other Tweets require authentication via the Twitter API
     if is_twitter_url(redirected_url): # TODO: Check this works
+      print("3")
       tweet_id = extract_status_id(redirected_url)
       tweet_text = tweet_id_to_text(tweet_id)
 
@@ -69,15 +72,19 @@ def unfurl_links(text):
     
     # Links to all other sources are fetched with the requests library
     else:
+      print("4")
       link_text = extract_text_from_simple_link(redirected_url, timeout=10)
-      # And shortened to their first 1000 words
-      link_text = clean_text(link_text)
-      link_text = truncate_text(link_text, 1000)
-      content = link_text
+      content = call_gpt("Please provide a one-paragraph summary of the following content:\n\n" + link_text, "gpt-3.5-turbo-1106")
+      # # And shortened to their first 1000 words
+      # link_text = clean_text(link_text)
+      # link_text = truncate_text(link_text, 1000)
+      # content = link_text
     
     # Replace each link with its content
     if media_flag==False: replacement_text = f"\n\nLink to: {redirected_url}\n\nContent from Link: {content}\n\n"
     else: replacement_text = "\n\nWARNING: This tweet contains an image or video that cannot be displayed.\n\n"
     text = text.replace(url, replacement_text)
+
+    print("5")
 
   return text
