@@ -13,6 +13,7 @@ def call_gpt(prompt, endpoint, max_tokens=200):
         max_tokens=max_tokens
     ).choices[0].message.content
 
+
 def truncate_text(text, max_tokens):
     tokens = text.split()
     if len(tokens) <= max_tokens:
@@ -20,11 +21,9 @@ def truncate_text(text, max_tokens):
     return ' '.join(tokens[:max_tokens])
 
 
-
 def human_rater_performance():
-
     """
-    Evaluates the performance of human raters in classifying notes as helpful or not. 
+    Evaluates the agreement between different human raters in classifying notes as helpful or not. 
     It compares user ratings from two files with the current status of notes to calculate 
     metrics like accuracy, precision, recall, specificity, and F1 score of user ratings.
     """

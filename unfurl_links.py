@@ -51,17 +51,14 @@ def unfurl_links(text):
   and incorporate the content into the body of the original text. 
   """
   # Use regex to extract all links from the text
-  print("1")
   links = extract_links_from_text(text)
   media_flag = False
-AwesoTha
+
   for url in links:
-    print(f"2: {url}")
     # Sometimes a link redirects to another link, so we need to follow the redirect
     redirected_url = requests.get(url, timeout=5).url
     # Links to other Tweets require authentication via the Twitter API
     if is_twitter_url(redirected_url): # TODO: Check this works
-      print("3")
       tweet_id = extract_status_id(redirected_url)
       tweet_text = tweet_id_to_text(tweet_id)
 
