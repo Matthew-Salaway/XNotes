@@ -1,3 +1,5 @@
 .env
-Data/*.tsv
+.tsv
+/Data/*.tsv
 .DS_Store
+/__pycache__
