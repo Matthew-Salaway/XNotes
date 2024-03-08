@@ -1,12 +1,14 @@
 # An Automated LLM Fact-Checker 
 This repository provides an automated system for running fact checks. It is built to fact-check Tweets, and to verify the accuracy of its fact-checks using historical data from Community Notes. The fact-checker is powered by OpenAI's GPT-3.5. 
 
+## Setup
 To run this repository, for the first time:
 1. Clone this Git repo.
 2. Set up a Python virtual environment (venv). 
 3. Install the packages in `requirements.txt`. 
 4. Create a file called `.env` modeled after `.env.example`. Paste into that file the OpenAI API Key and a Twitter Bearer Token from Slack.
 
+## Anatomy
 This repository consists of the following files:
 1. `data.py` downloads Community Notes notes and ratings from Twitter, then merges and filters these files to clean the data. These files do not contain the text of Tweets themselves, as this is the proprietary data of Twitter and is not made freely available. Instead, we have purchased a subscription to Twitter's API plan, and `data.py` provides a function for fetching Tweet text using the API. 
 2. `factchecker.py` writes notes and ratings for tweets. Its input is `master.csv`, and it saves a new version of `master.csv` for each new note or tweet. To help in the fact-checking process, it uses functions from `unfurl_links.py` and `websurfer.py`.
