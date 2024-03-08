@@ -1,16 +1,17 @@
-# Step 1
-Run the download_datasets_into_data_folder() function in the data.py file
-- This downloads the 5 data files from https://twitter.com/i/communitynotes/download-data and stores them in the data folder
-- This is about 2.9 GB of data
+# An Automated LLM Fact-Checker 
+This repository provides an automated system for running fact checks. It is built to fact-check Tweets, and to verify the accuracy of its fact-checks using historical data from Community Notes. The fact-checker is powered by OpenAI's GPT-3.5. 
 
-To run this repository, you will need to create a file called '.env' with an OpenAI API Key and a Twitter Bearer Token. See .env.example for the correct formatting. See Slack for the Key and Token. 
+To run this repository, for the first time:
+1. Clone this Git repo.
+2. Set up a Python virtual environment (venv). 
+3. Install the packages in `requirements.txt`. 
+4. Create a file called `.env` modeled after `.env.example`. Paste into that file the OpenAI API Key and a Twitter Bearer Token from Slack.
 
 This repository consists of the following files:
-1. `data.py` downloads Community Notes notes and ratings from Twitter, then performs merges and filters to clean the data. The first time you use this repository, you should use `data.py` to build your own version of `master.csv`. Once you understand what's happening inside `data.py` and the contents of `master.csv`, you can delete your own version and replace it with the group version of `master.csv`. 
-2. `factchecker.py` takes in `master.csv` as an input, and writes notes and ratings for each tweet. 
-3. `parallel_factchecker.py` is a parallelized version of the file above. 
-4. `unfurl_links.py` helps us handle text with links in it. 
-
-scans text to see if it contains links. If it contains a link, it fetches the content of the webpage and returns the text
-
-This repository consists of the following files. 
+1. `data.py` downloads Community Notes notes and ratings from Twitter, then merges and filters these files to clean the data. These files do not contain the text of Tweets themselves, as this is the proprietary data of Twitter and is not made freely available. Instead, we have purchased a subscription to Twitter's API plan, and `data.py` provides a function for fetching Tweet text using the API. 
+2. `factchecker.py` writes notes and ratings for tweets. Its input is `master.csv`, and it saves a new version of `master.csv` for each new note or tweet. To help in the fact-checking process, it uses functions from `unfurl_links.py` and `websurfer.py`.
+3. `unfurl_links.py` helps us handle text with links in it. For links to other Tweets, it uses the Twitter API to fetch the tweet text. For links to images and videos embedded in Tweets, it returns: `WARNING: This tweet contains an image or video that cannot be displayed.` For links to all other websites, it usesthe `requests` package to fetch text from the linked website. Sometimes, the website has a paywall or otherwise does not return relevant text; we do not have error handling for this case yet. 
+4. `websurfer.py` searches the internet for sources to inform a note or rating. The steps are: generate a search query, search via Google, loop through the results, determine whether each result is relevant, and summarize the relevant results. The summarized search results are returned to the factchecker. 
+5. `parallel_factchecker.py` is a parallelized version of `factchecker.py` which allows you to generate many ratings or fact checks at once.
+6. `fine-tuning.py` provides code for fine-tuning GPT-3.5 on historical Community Notes data. Our initial results with this method were mixed, and therefore we do not plan to prioritize it in our upcoming experiments.  
+6. `utils.py` contains functions that are commonly used in other files, such as `call_gpt()` and `truncate_text()`. 
